@@ -1,13 +1,8 @@
 package com.codahale.jerkson
 
-/**
- * Created by IntelliJ IDEA.
- * User: Alex Cruise
- * Date: 13/06/11
- * Time: 5:04 PM
- * To change this template use File | Settings | File Templates.
- */
+import util.DynamicVariable
+import org.codehaus.jackson.map.{Serializers, Deserializers}
 
-object CustomSerialization {
+object CustomSerializers extends DynamicVariable[Option[Serializers]](None)
 
-}
+object CustomDeserializers extends DynamicVariable[Option[Deserializers]](None)
