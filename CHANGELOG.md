@@ -1,3 +1,13 @@
+v0.1.7: Mar 31 2011
+===================
+
+* Upgraded to Jackson 1.7.4.
+
+v0.1.6: Feb 18 2011
+===================
+
+* Serialize `None` instances to `null`. (h/t Alex Cruise again)
+
 v0.1.5: Feb 18 2011
 ===================
 
