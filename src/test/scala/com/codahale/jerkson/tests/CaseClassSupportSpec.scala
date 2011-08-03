@@ -199,6 +199,26 @@ class CaseClassSupportSpec extends Spec {
     }
   }
 
+  class `A case class with an default constructor` {
+    def `should work OK` = {
+      generate(Unfortunate(1)) must beEqualTo("""{"i":1}""")
+    }
+  }
+
+  class `A case class with multiple non-default constructors` {
+    def `should die in a fire` = {
+      generate(DownrightSad(1234)) must throwA[ParsingException]
+    }
+  }
+
+  case class Unfortunate(i: Int) {
+    def this() = this(-1)
+  }
+
+  case class DownrightSad(j: Int) {
+    def this(k: Long) = this(k.toInt)
+  }
+
   abstract class InheritedMutable {
     var pokeMe: Int = 0
   }

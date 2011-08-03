@@ -13,8 +13,11 @@ import org.codehaus.jackson.map.annotate.JsonCachable
 class CaseClassDeserializer(config: DeserializationConfig,
                             javaType: JavaType,
                             provider: DeserializerProvider) extends JsonDeserializer[Object] {
-  require(javaType.getRawClass.getConstructors.length == 1, "Case classes must only have one constructor.")
-  private val constructor = javaType.getRawClass.getConstructors.head
+  val nonDefaultConstructors = javaType.getRawClass.getConstructors.filter(_.getParameterTypes.length != 0)
+
+  require(nonDefaultConstructors.length == 1, "Case classes must only have one non-default constructor.")
+
+  private val constructor = nonDefaultConstructors.head
   private val params = CaseClassSigParser.parse(javaType.getRawClass, config.getTypeFactory).toArray
 
   def deserialize(jp: JsonParser, ctxt: DeserializationContext): Object = {
