@@ -192,4 +192,16 @@ class CaseClassSupportSpec extends Spec {
       parse[OuterObject.InnerObject.SuperNestedCaseClass]("""{"id": 1}""") must beEqualTo(OuterObject.InnerObject.SuperNestedCaseClass(1))
     }
   }
+
+  class `A case class with inherited mutable properties` {
+    def `should be serialized with the inherited properties` = {
+      generate(CaseClassWithInheritedMutable("hello")) must beEqualTo("""{"pokeMe":0,"s":"hello"}""")
+    }
+  }
+
+  abstract class InheritedMutable {
+    var pokeMe: Int = 0
+  }
+
+  case class CaseClassWithInheritedMutable(s: String) extends InheritedMutable
 }

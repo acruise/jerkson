@@ -15,7 +15,7 @@ class ScalaSerializers extends Serializers.None {
     } else if (classOf[Range].isAssignableFrom(beanDesc.getBeanClass)) {
       new RangeSerializer
     } else if (classOf[Iterable[_]].isAssignableFrom(beanDesc.getBeanClass)) {
-        new IterableSerializer
+      new IterableSerializer
     } else if (classOf[Iterator[_]].isAssignableFrom(beanDesc.getBeanClass)) {
       new IteratorSerializer
     } else if (classOf[JValue].isAssignableFrom(beanDesc.getBeanClass)) {

@@ -16,8 +16,6 @@ class ScalaModule extends Module {
 
   def setupModule(context: SetupContext) {
     context.addDeserializers(new ScalaDeserializers)
-    CustomDeserializers.value.foreach(context.addDeserializers(_))
     context.addSerializers(new ScalaSerializers)
-    CustomSerializers.value.foreach(context.addSerializers(_))
   }
 }
