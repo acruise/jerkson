@@ -1,51 +1,54 @@
 package com.codahale.jerkson.tests
 
-import com.codahale._
-import simplespec._
-import jerkson._
-import Json._
-import AST._
+import com.codahale.jerkson.Json._
+import com.codahale.jerkson.AST._
+import com.codahale.simplespec.Spec
+import com.codahale.simplespec.annotation.test
 
-object JValueSpec extends Spec {
-  class `selecting single nodes` {
-    def `should return None with primitives` {
+class JValueSpec extends Spec {
+  class `Selecting single nodes` {
+    @test def `returns None with primitives` = {
       parse[JValue]("8") \ "blah" must be(JNull)
     }
     
-    def `should return None on nonexistant fields` {
-      parse[JValue]("{\"butt\": \"poop\"}") \ "anus" must be(JNull)
+    @test def `returns None on nonexistent fields` = {
+      parse[JValue]("{\"one\": \"1\"}") \ "two" must be(JNull)
     }
     
-    def `should return a JValue with an existing field` {
-      parse[JValue]("{\"butt\": \"poop\"}") \ "butt" must beEqualTo(JString("poop"))
+    @test def `returns a JValue with an existing field` = {
+      parse[JValue]("{\"one\": \"1\"}") \ "one" must beEqualTo(JString("1"))
     }
   }
   
-  class `selecting array members` {
-    def `should return  None with primitives` {
+  class `Selecting array members` {
+    @test def `returns None with primitives` = {
       parse[JValue]("\"derp\"").apply(0) must be(JNull)
     }
     
-    def `should return None on out of bounds` {
+    @test def `returns None on out of bounds` = {
       parse[JValue]("[0, 1, 2, 3]").apply(4) must be(JNull)
     }
     
-    def `should return a JValue` {
+    @test def `returns a JValue` = {
       parse[JValue]("[0, 1, 2, 3]").apply(2) must beEqualTo(JInt(2))
     }
   }
   
-  class `deep select` {
-    def `should return None with primitives` {
-      parse[JValue]("0.234") \\ "herp" must be(Nil)
+  class `Deep selecting` {
+    @test def `returns Nil with primitives` = {
+      parse[JValue]("0.234") \\ "herp" must beEmpty
+    }
+
+    @test def `returns Nil on nothing found` = {
+      parse[JValue]("{\"one\": {\"two\" : \"three\"}}") \\ "four" must beEmpty
     }
     
-    def `should return None on nothing found` {
-      parse[JValue]("{\"butt\": {\"anus\" : \"poopoo\"}}") \\ "anus" must beEqualTo(Seq(JString("poopoo")))
+    @test def `returns single leaf nodes` = {
+      parse[JValue]("{\"one\": {\"two\" : \"three\"}}") \\ "two" must beEqualTo(Seq(JString("three")))
     }
     
-    def `should return multiple leaf nodes` {
-      parse[JValue]("{\"butt\": {\"anus\" : \"poopoo\"}, \"rectum\": {\"anus\" : \"dookie\"}}") \\ "anus" must beEqualTo(Seq(JString("poopoo"),JString("dookie")))
+    @test def `should return multiple leaf nodes` = {
+      parse[JValue]("{\"one\": {\"two\" : \"three\"}, \"four\": {\"two\" : \"five\"}}") \\ "two" must beEqualTo(Seq(JString("three"),JString("five")))
     }
   }
 }

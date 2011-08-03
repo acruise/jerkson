@@ -8,7 +8,7 @@ import collection.generic.MapFactory
 import collection.MapLike
 
 @JsonCachable
-class MapDeserializer[CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](companion: MapFactory[CC],
+class ImmutableMapDeserializer[CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](companion: MapFactory[CC],
                                                                           valueType: JavaType,
                                                                           valueDeserializer: JsonDeserializer[Object])
   extends JsonDeserializer[Object] {
@@ -20,13 +20,18 @@ class MapDeserializer[CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](compan
       jp.nextToken()
     }
 
-    while (jp.getCurrentToken() != JsonToken.END_OBJECT) {
+    if (jp.getCurrentToken != JsonToken.FIELD_NAME &&
+        jp.getCurrentToken != JsonToken.END_OBJECT) {
+      throw ctxt.mappingException(valueType.getRawClass)
+    }
+
+    while (jp.getCurrentToken != JsonToken.END_OBJECT) {
       val name = jp.getCurrentName
       jp.nextToken()
       builder += ((name, valueDeserializer.deserialize(jp, ctxt)))
       jp.nextToken()
     }
 
-    builder.result
+    builder.result()
   }
 }

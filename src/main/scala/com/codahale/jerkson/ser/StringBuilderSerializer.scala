@@ -5,9 +5,8 @@ import org.codehaus.jackson.map.{SerializerProvider, JsonSerializer}
 import org.codehaus.jackson.map.annotate.JsonCachable
 
 @JsonCachable
-class OptionSerializer extends JsonSerializer[Option[_]] {
-  def serialize(value: Option[_], json: JsonGenerator,
-                provider: SerializerProvider) {
-    provider.defaultSerializeValue(value.orNull, json)
+class StringBuilderSerializer extends JsonSerializer[StringBuilder] {
+  def serialize(value: StringBuilder, json: JsonGenerator, provider: SerializerProvider) {
+    json.writeString(value.toString())
   }
 }

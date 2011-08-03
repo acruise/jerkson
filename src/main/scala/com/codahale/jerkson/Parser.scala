@@ -61,13 +61,12 @@ trait Parser extends Factory {
   }
 
   /**
-   * Parse a streaming JSON array of particular types, passing each deserialized
-   * object to a callback method.
+   * Parse a streaming JSON array of particular types, returning an iterator
+   * of the elements of the stream.
    */
-  @deprecated("Use Json.stream instead")
-  // TODO: 2/18/11 <coda> -- remove for 0.2.0
-  def parseStreamOf[A](input: InputStream)(callback: A => Unit)(implicit mf: Manifest[A]) {
-    stream[A](input)(mf).foreach(callback)
+  def stream[A](input: Reader)(implicit mf: Manifest[A]): Iterator[A] = {
+    val parser = factory.createJsonParser(input)
+    new StreamingIterator[A](parser, mf)
   }
 
   private[jerkson] def parse[A](parser: JsonParser, mf: Manifest[A]): A = {
@@ -75,11 +74,11 @@ trait Parser extends Factory {
       if (mf.erasure == classOf[Option[_]]) {
         // thanks for special-casing VALUE_NULL, guys
         Option(parse(parser, mf.typeArguments.head)).asInstanceOf[A]
-      } else if (mf.erasure == classOf[JValue]) {
-        val value: A = parser.getCodec.readValue(parser, manifest2JavaType(mf))
+      } else if (mf.erasure == classOf[JValue] || mf.erasure == JNull.getClass) {
+        val value: A = parser.getCodec.readValue(parser, Types.build(mapper.getTypeFactory, mf))
         if (value == null) JNull.asInstanceOf[A] else value
       } else {
-        parser.getCodec.readValue(parser, manifest2JavaType(mf))
+        parser.getCodec.readValue(parser, Types.build(mapper.getTypeFactory, mf))
       }
     } catch {
       case e: JsonProcessingException => throw ParsingException(e)
