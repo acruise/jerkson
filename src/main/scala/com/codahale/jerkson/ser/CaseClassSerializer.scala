@@ -9,7 +9,7 @@ import java.lang.reflect.{Field, Modifier}
 @JsonCachable
 class CaseClassSerializer[A <: Product](klass: Class[_]) extends JsonSerializer[A] {
   private def ignoreField(f: Field): Boolean = {
-      f.getAnnotation(classOf[JsonIgnore]) != null || (f.getModifiers & Modifier.TRANSIENT) != 0 || f.getName.contains("$")
+      f.isAnnotationPresent(classOf[JsonIgnore]) || (f.getModifiers & Modifier.TRANSIENT) != 0 || f.getName.contains("$")
   }
 
   private val nonIgnoredFields = Option(klass.getSuperclass).map(_.getDeclaredFields.filterNot(ignoreField _)).flatten.toList ++

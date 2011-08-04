@@ -15,7 +15,7 @@ class CaseClassDeserializer(config: DeserializationConfig,
                             javaType: JavaType,
                             provider: DeserializerProvider) extends JsonDeserializer[Object] {
   val nonDefaultConstructors = javaType.getRawClass.getConstructors.filter { ctor =>
-    ctor.getParameterTypes.length != 0 && ctor.getAnnotation(classOf[JsonIgnore]) == null
+    ctor.getParameterTypes.length != 0 && !ctor.isAnnotationPresent(classOf[JsonIgnore])
   }
 
   require(nonDefaultConstructors.length == 1, "Case classes must only have one non-default constructor.")
