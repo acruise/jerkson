@@ -55,3 +55,21 @@ object OuterObject {
     case class SuperNestedCaseClass(id: Long)
   }
 }
+
+case class Unfortunate(i: Int) {
+  @JsonIgnore
+  def this() = this(-1)
+}
+
+case class DownrightSad(j: Int) {
+  def this(k: Long) = this(k.toInt)
+}
+
+abstract class InheritedMutable {
+  var pokeMe: Int = 0
+}
+
+case class CaseClassWithInheritedMutable(s: String) extends InheritedMutable
+
+abstract class InheritedVal(val gene: String)
+case class CaseClassWithOverrideVal(override val gene: String, bob: Int) extends InheritedVal(gene)

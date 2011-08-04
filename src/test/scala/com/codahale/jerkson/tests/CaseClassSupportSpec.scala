@@ -194,34 +194,43 @@ class CaseClassSupportSpec extends Spec {
   }
 
   class `A case class with inherited mutable properties` {
-    def `should be serialized with the inherited properties` = {
+    @test def `should be serialized with the inherited properties` = {
       generate(CaseClassWithInheritedMutable("hello")) must beEqualTo("""{"pokeMe":0,"s":"hello"}""")
     }
   }
 
   class `A case class with an default constructor` {
-    def `should work OK` = {
+    @test def `should generate OK` = {
       generate(Unfortunate(1)) must beEqualTo("""{"i":1}""")
+    }
+
+    @test def `should parse like the wind` = {
+      parse[Unfortunate]("""{"i":123}""") must beEqualTo(Unfortunate(123))
     }
   }
 
   class `A case class with multiple non-default constructors` {
-    def `should die in a fire` = {
-      generate(DownrightSad(1234)) must throwA[ParsingException]
+    // Don't care how they get generated
+
+    @test def `should die in a fire` = {
+      parse[DownrightSad]("""{"j":123}""") must throwA[ParsingException]
     }
   }
 
-  case class Unfortunate(i: Int) {
-    def this() = this(-1)
-  }
+  class `A case class with an override val` {
+    @test def `should generate OK` = {
+      generate(CaseClassWithOverrideVal("AGTC",1)) must beEqualTo("""{"gene":"AGTC","bob":1}""")
+    }
 
-  case class DownrightSad(j: Int) {
-    def this(k: Long) = this(k.toInt)
-  }
+    @test def `should parse OK` = {
+      parse[CaseClassWithOverrideVal]("""{"gene":"GATTACA","bob":2}""") must beEqualTo(CaseClassWithOverrideVal("GATTACA",2))
+    }
 
-  abstract class InheritedMutable {
-    var pokeMe: Int = 0
+    @test def `should roundtrip` = {
+      val value1 = CaseClassWithOverrideVal("CAT",3)
+      val json = generate(value1)
+      val value2 = parse[CaseClassWithOverrideVal](json)
+      value1 must beEqualTo(value2)
+    }
   }
-
-  case class CaseClassWithInheritedMutable(s: String) extends InheritedMutable
 }

@@ -8,12 +8,15 @@ import org.codehaus.jackson.{JsonNode, JsonToken, JsonParser}
 import com.codahale.jerkson.util._
 import org.codehaus.jackson.node.{ObjectNode, NullNode, TreeTraversingParser}
 import org.codehaus.jackson.map.annotate.JsonCachable
+import org.codehaus.jackson.annotate.JsonIgnore
 
 @JsonCachable
 class CaseClassDeserializer(config: DeserializationConfig,
                             javaType: JavaType,
                             provider: DeserializerProvider) extends JsonDeserializer[Object] {
-  val nonDefaultConstructors = javaType.getRawClass.getConstructors.filter(_.getParameterTypes.length != 0)
+  val nonDefaultConstructors = javaType.getRawClass.getConstructors.filter { ctor =>
+    ctor.getParameterTypes.length != 0 && ctor.getAnnotation(classOf[JsonIgnore]) == null
+  }
 
   require(nonDefaultConstructors.length == 1, "Case classes must only have one non-default constructor.")
 
