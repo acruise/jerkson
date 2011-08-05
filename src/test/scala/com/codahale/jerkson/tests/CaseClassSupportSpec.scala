@@ -233,4 +233,18 @@ class CaseClassSupportSpec extends Spec {
       value1 must beEqualTo(value2)
     }
   }
+
+  class `A case class with a hardcoded inherited parameter` {
+    @test def `should generate OK` = {
+      val json = generate(Kiddo(123))
+      println(json)
+      json must beEqualTo("""{"oldness":"extreme","s":"aww","i":123}""")
+    }
+
+    @test def `should parse OK` = {
+      val cc = parse[Kiddo]("""{"oldness":"extreme","s":"aww","i":123}""")
+      println(cc)
+      cc must beEqualTo(Kiddo(123))
+    }
+  }
 }

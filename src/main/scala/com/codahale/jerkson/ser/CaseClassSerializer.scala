@@ -12,8 +12,18 @@ class CaseClassSerializer[A <: Product](klass: Class[_]) extends JsonSerializer[
       f.isAnnotationPresent(classOf[JsonIgnore]) || (f.getModifiers & Modifier.TRANSIENT) != 0 || f.getName.contains("$")
   }
 
-  private val nonIgnoredFields = Option(klass.getSuperclass).map(_.getDeclaredFields.filterNot(ignoreField _)).flatten.toList ++
-                                 klass.getDeclaredFields.filterNot(ignoreField _)
+  private val nonIgnoredFields = {
+    // TODO this should be an unfold but I R not SMRT
+    var soup = klass.getSuperclass
+    var fields = List(klass.getDeclaredFields.filterNot(ignoreField _)) // No _* on purpose
+
+    while (soup != null) {
+      fields ::= soup.getDeclaredFields.filterNot(ignoreField _).reverse
+      soup = soup.getSuperclass
+    }
+
+    fields.flatten
+  }
 
   private val methods = klass.getDeclaredMethods
                                 .filter { m => m.getParameterTypes.isEmpty && !m.getName.contains("$") }

@@ -73,3 +73,7 @@ case class CaseClassWithInheritedMutable(s: String) extends InheritedMutable
 
 abstract class InheritedVal(val gene: String)
 case class CaseClassWithOverrideVal(override val gene: String, bob: Int) extends InheritedVal(gene)
+
+abstract class Grandpappy(val oldness: String)
+abstract class Dad(val s: String) extends Grandpappy("extreme")
+case class Kiddo(i: Int) extends Dad("aww")
