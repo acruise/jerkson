@@ -2,6 +2,7 @@ package com.simple.simplespec
 
 import org.hamcrest.Matcher
 import org.junit.Assert
+import language.implicitConversions
 
 trait Matchables {
   implicit def any2LiteralMatchable[A](value: A) = new LiteralMatchable[A](value)

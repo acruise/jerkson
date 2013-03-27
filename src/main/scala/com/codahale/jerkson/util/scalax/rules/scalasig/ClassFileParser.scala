@@ -3,11 +3,9 @@ package scalax
 package rules
 package scalasig
 
-
 import java.io.IOException
 
-import scala._
-import scala.Predef._
+import scala.language.postfixOps
 
 object ByteCode {
   def apply(bytes: Array[Byte]) = new ByteCode(bytes, 0, bytes.length)

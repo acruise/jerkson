@@ -1,8 +1,11 @@
 package com.simple.simplespec
 
-import java.lang.reflect.Modifier._
 import java.util.ArrayList
+import java.lang.reflect.Modifier._
+
 import scala.reflect.NameTransformer
+import scala.language.existentials
+
 import org.junit.internal.runners.statements.{RunAfters, RunBefores}
 import org.junit.runner.{Description, Runner}
 import org.junit.runner.notification.RunNotifier

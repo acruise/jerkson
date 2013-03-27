@@ -1,10 +1,12 @@
 package com.codahale.jerkson.deser
 
+import collection.generic.MapFactory
+import collection.MapLike
+import language.higherKinds
+
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonDeserializer}
 import com.fasterxml.jackson.core.{JsonToken, JsonParser}
-import collection.generic.MapFactory
-import collection.MapLike
 import com.fasterxml.jackson.databind.deser.ResolvableDeserializer
 
 class ImmutableMapDeserializer[CC[A, B] <: Map[A, B] with MapLike[A, B, CC[A, B]]](companion: MapFactory[CC],

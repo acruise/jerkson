@@ -1,9 +1,11 @@
 package com.codahale.jerkson.deser
 
+import collection.generic.GenericCompanion
+import language.higherKinds
+
 import com.fasterxml.jackson.core.{JsonToken, JsonParser}
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.{JsonDeserializer, DeserializationContext}
-import collection.generic.GenericCompanion
 import com.fasterxml.jackson.databind.deser.ResolvableDeserializer
 
 class SeqDeserializer[+CC[X] <: Traversable[X]](companion: GenericCompanion[CC],

@@ -2,6 +2,8 @@ package com.codahale.jerkson.util
 package scalax
 package rules
 
+import scala.language.{implicitConversions, postfixOps}
+
 trait Name {
   def name: String
 

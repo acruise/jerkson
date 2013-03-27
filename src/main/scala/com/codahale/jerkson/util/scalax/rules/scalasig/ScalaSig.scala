@@ -3,6 +3,8 @@ package scalax
 package rules
 package scalasig
 
+import scala.language.{postfixOps, implicitConversions}
+
 import ClassFileParser.{ConstValueIndex, Annotation}
 
 object ScalaSigParser {

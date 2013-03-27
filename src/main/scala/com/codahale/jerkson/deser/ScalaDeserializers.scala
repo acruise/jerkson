@@ -1,12 +1,14 @@
 package com.codahale.jerkson.deser
 
-import com.fasterxml.jackson.databind._
 import scala.collection.{Traversable, MapLike, immutable, mutable}
-import com.codahale.jerkson.AST.{JNull, JValue}
 import scala.collection.generic.{MapFactory, GenericCompanion}
+import scala.language.higherKinds
+
 import com.fasterxml.jackson.databind.deser.Deserializers
 import com.fasterxml.jackson.databind.Module.SetupContext
 import com.fasterxml.jackson.databind.{JavaType, DeserializationConfig, BeanDescription, JsonDeserializer}
+
+import com.codahale.jerkson.AST.{JNull, JValue}
 
 class ScalaDeserializers(classLoader: ClassLoader, context: SetupContext) extends Deserializers.Base {
 
