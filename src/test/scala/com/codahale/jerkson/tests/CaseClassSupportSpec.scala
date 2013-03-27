@@ -1,117 +1,117 @@
 package com.codahale.jerkson.tests
 
 import com.codahale.jerkson.Json._
-import com.codahale.simplespec.Spec
+import com.simple.simplespec.Spec
 import com.codahale.jerkson.ParsingException
-import org.codehaus.jackson.node.IntNode
-import com.codahale.simplespec.annotation.test
+import com.fasterxml.jackson.databind.node.IntNode
+import org.junit.Test
 
 class CaseClassSupportSpec extends Spec {
   class `A basic case class` {
-    @test def `generates a JSON object with matching field values` = {
-      generate(CaseClass(1, "Coda")) must
-        beEqualTo("""{"id":1,"name":"Coda"}""")
+    @Test def `generates a JSON object with matching field values` = {
+      generate(CaseClass(1, "Coda")).must(be("""{"id":1,"name":"Coda"}"""))
     }
 
-    @test def `is parsable from a JSON object with corresponding fields` = {
-      parse[CaseClass]("""{"id":1,"name":"Coda"}""") must
-        beEqualTo(CaseClass(1, "Coda"))
+    @Test def `is parsable from a JSON object with corresponding fields` = {
+      parse[CaseClass]("""{"id":1,"name":"Coda"}""").must(be(CaseClass(1, "Coda")))
     }
 
-    @test def `is parsable from a JSON object with extra fields` = {
-      parse[CaseClass]("""{"id":1,"name":"Coda","derp":100}""") must
-        beEqualTo(CaseClass(1, "Coda"))
+    @Test def `is parsable from a JSON object with extra fields` = {
+      parse[CaseClass]("""{"id":1,"name":"Coda","derp":100}""").must(be(CaseClass(1, "Coda")))
     }
 
-    @test def `is not parsable from a JSON object which doesn't include all of the matching field values` = {
-      parse[CaseClass]("""{"id":1}""") must
-        throwA[ParsingException]("""Invalid JSON. Needed \[id, name\], but found \[id\].""")
+    @Test def `is not parsable from an incomplete JSON object` = {
+      evaluating {
+        parse[CaseClass]("""{"id":1}""")
+      }.must(throwA[ParsingException]("""Invalid JSON. Needed [id, name], but found [id]."""))
     }
   }
 
   class `A case class with lazy fields` {
-    @test def `generates a JSON object with those fields evaluated` = {
-      generate(CaseClassWithLazyVal(1)) must
-        beEqualTo("""{"id":1,"woo":"yeah"}""")
+    @Test def `generates a JSON object with those fields evaluated` = {
+      generate(CaseClassWithLazyVal(1)).must(be("""{"id":1,"woo":"yeah"}"""))
     }
 
-    @test def `is parsable from a JSON object without those fields` = {
-      parse[CaseClassWithLazyVal]("""{"id":1}""") must
-        beEqualTo(CaseClassWithLazyVal(1))
+    @Test def `is parsable from a JSON object without those fields` = {
+      parse[CaseClassWithLazyVal]("""{"id":1}""").must(be(CaseClassWithLazyVal(1)))
     }
 
-    @test def `is not parsable from a JSON object which doesn't include all of the matching field values` = {
-      parse[CaseClassWithLazyVal]("""{}""") must
-        throwA[ParsingException]("""Invalid JSON. Needed \[id], but found \[\].""")
+    @Test def `is not parsable from an incomplete JSON object` = {
+      evaluating {
+        parse[CaseClassWithLazyVal]("""{}""")
+      }.must(throwA[ParsingException]("""Invalid JSON. Needed [id], but found []."""))
     }
   }
 
   class `A case class with ignored members` {
-    @test def `generates a JSON object without those fields` = {
-      generate(CaseClassWithIgnoredField(1)) must beEqualTo("""{"id":1}""")
+    @Test def `generates a JSON object without those fields` = {
+      generate(CaseClassWithIgnoredField(1)).must(be("""{"id":1}"""))
+      generate(CaseClassWithIgnoredFields(1)).must(be("""{"id":1}"""))
     }
 
-    @test def `is parsable from a JSON object without those fields` = {
-      parse[CaseClassWithIgnoredField]("""{"id":1}""") must
-        beEqualTo(CaseClassWithIgnoredField(1))
+    @Test def `is parsable from a JSON object without those fields` = {
+      parse[CaseClassWithIgnoredField]("""{"id":1}""").must(be(CaseClassWithIgnoredField(1)))
+      parse[CaseClassWithIgnoredFields]("""{"id":1}""").must(be(CaseClassWithIgnoredFields(1)))
     }
 
-    @test def `is not parsable from a JSON object which doesn't include all of the matching fields` = {
-      parse[CaseClassWithIgnoredField]("""{}""") must
-        throwA[ParsingException]("""Invalid JSON. Needed \[id], but found \[\].""")
+    @Test def `is not parsable from an incomplete JSON object` = {
+      evaluating {
+        parse[CaseClassWithIgnoredField]("""{}""")
+      }.must(throwA[ParsingException]("""Invalid JSON. Needed [id], but found []."""))
+
+      evaluating {
+        parse[CaseClassWithIgnoredFields]("""{}""")
+      }.must(throwA[ParsingException]("""Invalid JSON. Needed [id], but found []."""))
     }
   }
 
   class `A case class with transient members` {
-    @test def `generates a JSON object without those fields` = {
-      generate(CaseClassWithTransientField(1)) must beEqualTo("""{"id":1}""")
+    @Test def `generates a JSON object without those fields` = {
+      generate(CaseClassWithTransientField(1)).must(be("""{"id":1}"""))
     }
 
-    @test def `is parsable from a JSON object without those fields` = {
-      parse[CaseClassWithTransientField]("""{"id":1}""") must
-        beEqualTo(CaseClassWithTransientField(1))
+    @Test def `is parsable from a JSON object without those fields` = {
+      parse[CaseClassWithTransientField]("""{"id":1}""").must(be(CaseClassWithTransientField(1)))
     }
 
-    @test def `is not parsable from a JSON object which doesn't include all of the matching fields` = {
-      parse[CaseClassWithTransientField]("""{}""") must
-        throwA[ParsingException]("""Invalid JSON. Needed \[id], but found \[\].""")
+    @Test def `is not parsable from an incomplete JSON object` = {
+      evaluating {
+        parse[CaseClassWithTransientField]("""{}""")
+      }.must(throwA[ParsingException]("""Invalid JSON. Needed [id], but found []."""))
     }
   }
 
   class `A case class with an overloaded field` {
-    @test def `generates a JSON object with the nullary version of that field` = {
-      generate(CaseClassWithOverloadedField(1)) must beEqualTo("""{"id":1}""")
+    @Test def `generates a JSON object with the nullary version of that field` = {
+      generate(CaseClassWithOverloadedField(1)).must(be("""{"id":1}"""))
     }
   }
 
   class `A case class with an Option[String] member` {
-    @test def `generates a field if the member is Some` = {
-      generate(CaseClassWithOption(Some("what"))) must beEqualTo("""{"value":"what"}""")
+    @Test def `generates a field if the member is Some` = {
+      generate(CaseClassWithOption(Some("what"))).must(be("""{"value":"what"}"""))
     }
 
-    @test def `is parsable from a JSON object with that field` = {
-      parse[CaseClassWithOption]("""{"value":"what"}""") must
-        beEqualTo(CaseClassWithOption(Some("what")))
+    @Test def `is parsable from a JSON object with that field` = {
+      parse[CaseClassWithOption]("""{"value":"what"}""").must(be(CaseClassWithOption(Some("what"))))
     }
 
-    @test def `doesn't generate a field if the member is None` = {
-      generate(CaseClassWithOption(None)) must beEqualTo("""{}""")
+    @Test def `doesn't generate a field if the member is None` = {
+      generate(CaseClassWithOption(None)).must(be("""{}"""))
     }
 
-    @test def `is parsable from a JSON object without that field` = {
-      parse[CaseClassWithOption]("""{}""") must
-        beEqualTo(CaseClassWithOption(None))
+    @Test def `is parsable from a JSON object without that field` = {
+      parse[CaseClassWithOption]("""{}""").must(be(CaseClassWithOption(None)))
     }
 
-    @test def `is parsable from a JSON object with a null value for that field` = {
-      parse[CaseClassWithOption]("""{"value":null}""") must
-        beEqualTo(CaseClassWithOption(None))
+    @Test def `is parsable from a JSON object with a null value for that field` = {
+      parse[CaseClassWithOption]("""{"value":null}""").must(be(CaseClassWithOption(None)))
     }
   }
 
   class `A case class with a JsonNode member` {
-    @test def `generates a field of the given type` = {
-      generate(CaseClassWithJsonNode(new IntNode(2))) must beEqualTo("""{"value":2}""")
+    @Test def `generates a field of the given type` = {
+      generate(CaseClassWithJsonNode(new IntNode(2))).must(be("""{"value":2}"""))
     }
   }
 
@@ -152,8 +152,8 @@ class CaseClassSupportSpec extends Spec {
                """
 
 
-    @test def `is parsable from a JSON object with those fields` = {
-      parse[CaseClassWithAllTypes](json) must beEqualTo(
+    @Test def `is parsable from a JSON object with those fields` = {
+      parse[CaseClassWithAllTypes](json).must(be(
         CaseClassWithAllTypes(
           map = Map("one" -> "two"),
           set = Set(1, 2, 3),
@@ -177,19 +177,63 @@ class CaseClassSupportSpec extends Spec {
           intMap = Map(1 -> 1),
           longMap = Map(2L -> 2L)
         )
-      )
+      ))
     }
   }
 
   class `A case class nested inside of an object` {
-    @test def `is parsable from a JSON object` = {
-      parse[OuterObject.NestedCaseClass]("""{"id": 1}""") must beEqualTo(OuterObject.NestedCaseClass(1))
+    @Test def `is parsable from a JSON object` = {
+      parse[OuterObject.NestedCaseClass]("""{"id": 1}""").must(be(OuterObject.NestedCaseClass(1)))
     }
   }
 
   class `A case class nested inside of an object nested inside of an object` {
-    @test def `is parsable from a JSON object` = {
-      parse[OuterObject.InnerObject.SuperNestedCaseClass]("""{"id": 1}""") must beEqualTo(OuterObject.InnerObject.SuperNestedCaseClass(1))
+    @Test def `is parsable from a JSON object` = {
+      parse[OuterObject.InnerObject.SuperNestedCaseClass]("""{"id": 1}""").must(be(OuterObject.InnerObject.SuperNestedCaseClass(1)))
+    }
+  }
+
+  class `A case class with two constructors` {
+    @Test def `is parsable from a JSON object with the same parameters as the case accessor` = {
+      parse[CaseClassWithTwoConstructors]("""{"id":1,"name":"Bert"}""").must(be(CaseClassWithTwoConstructors(1, "Bert")))
+    }
+
+    @Test def `is parsable from a JSON object which works with the second constructor` = {
+      evaluating {
+        parse[CaseClassWithTwoConstructors]("""{"id":1}""")
+      }.must(throwA[ParsingException])
+    }
+  }
+
+  class `A case class with snake-cased fields` {
+    @Test def `is parsable from a snake-cased JSON object` = {
+      parse[CaseClassWithSnakeCase]("""{"one_thing":"yes","two_thing":"good"}""").must(be(CaseClassWithSnakeCase("yes", "good")))
+    }
+
+    @Test def `generates a snake-cased JSON object` = {
+      generate(CaseClassWithSnakeCase("yes", "good")).must(be("""{"one_thing":"yes","two_thing":"good"}"""))
+    }
+
+    @Test def `throws errors with the snake-cased field names present` = {
+      evaluating {
+        parse[CaseClassWithSnakeCase]("""{"one_thing":"yes"}""")
+      }.must(throwA[ParsingException]("Invalid JSON. Needed [one_thing, two_thing], but found [one_thing]."))
+    }
+  }
+
+  class `A case class with array members` {
+    @Test def `is parsable from a JSON object` = {
+      val c = parse[CaseClassWithArrays]("""{"one":"1","two":["a","b","c"],"three":[1,2,3]}""")
+
+      c.one.must(be("1"))
+      c.two.must(be(Array("a", "b", "c")))
+      c.three.must(be(Array(1, 2, 3)))
+    }
+
+    @Test def `generates a JSON object` = {
+      generate(CaseClassWithArrays("1", Array("a", "b", "c"), Array(1, 2, 3))).must(be(
+        """{"one":"1","two":["a","b","c"],"three":[1,2,3]}"""
+      ))
     }
   }
 

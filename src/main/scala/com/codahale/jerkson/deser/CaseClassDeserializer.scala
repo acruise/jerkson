@@ -1,26 +1,17 @@
 package com.codahale.jerkson.deser
 
 import scala.collection.JavaConversions._
-import org.codehaus.jackson.`type`.JavaType
-import collection.mutable.ArrayBuffer
-import org.codehaus.jackson.map._
-import org.codehaus.jackson.{JsonNode, JsonToken, JsonParser}
+import scala.collection.mutable.ArrayBuffer
+import com.codahale.jerkson.JsonSnakeCase
 import com.codahale.jerkson.util._
 import org.codehaus.jackson.node.{ObjectNode, NullNode, TreeTraversingParser}
 import org.codehaus.jackson.map.annotate.JsonCachable
-import org.codehaus.jackson.annotate.JsonIgnore
 
-@JsonCachable
 class CaseClassDeserializer(config: DeserializationConfig,
                             javaType: JavaType,
                             provider: DeserializerProvider) extends JsonDeserializer[Object] {
-  val nonDefaultConstructors = javaType.getRawClass.getConstructors.filter { ctor =>
-    ctor.getParameterTypes.length != 0 && !ctor.isAnnotationPresent(classOf[JsonIgnore])
-  }
-
-  require(nonDefaultConstructors.length == 1, "Case classes must only have one non-default constructor.")
-
-  private val constructor = nonDefaultConstructors.head
+  require(javaType.getRawClass.getConstructors.length == 1, "Case classes must only have one constructor.")
+  private val constructor = javaType.getRawClass.getConstructors.head
   private val params = CaseClassSigParser.parse(javaType.getRawClass, config.getTypeFactory).toArray
 
   def deserialize(jp: JsonParser, ctxt: DeserializationContext): Object = {
@@ -33,7 +24,7 @@ class CaseClassDeserializer(config: DeserializationConfig,
       throw ctxt.mappingException(javaType.getRawClass)
     }
 
-    val node = jp.readValueAsTree
+    val node = jp.readValueAsTree[JsonNode]
 
     val values = new ArrayBuffer[AnyRef]
     for ((paramName, paramType) <- params) {
@@ -60,12 +51,14 @@ class CaseClassDeserializer(config: DeserializationConfig,
   }
 
   private def errorMessage(node: JsonNode) = {
-    val names = params.map {_._1}.mkString("[", ", ", "]")
+    val names = params.map { _._1 }.mkString("[", ", ", "]")
     val existing = node match {
-      case obj: ObjectNode => obj.getFieldNames.mkString("[", ", ", "]")
+      case obj: ObjectNode => obj.fieldNames.mkString("[", ", ", "]")
       case _: NullNode => "[]" // this is what Jackson deserializes the inside of an empty object to
       case unknown => "a non-object"
     }
     "Invalid JSON. Needed %s, but found %s.".format(names, existing)
   }
+
+  override def isCachable = true
 }

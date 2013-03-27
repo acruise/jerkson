@@ -1,14 +1,18 @@
 package com.codahale.jerkson.deser
 
-import org.codehaus.jackson.`type`.JavaType
-import org.codehaus.jackson.map.{DeserializationContext, JsonDeserializer}
-import org.codehaus.jackson.{JsonToken, JsonParser}
-import org.codehaus.jackson.map.annotate.JsonCachable
+import com.fasterxml.jackson.databind.JavaType
+import com.fasterxml.jackson.databind.{DeserializationContext, JsonDeserializer}
+import com.fasterxml.jackson.core.{JsonToken, JsonParser}
+import com.fasterxml.jackson.databind.deser.ResolvableDeserializer
 
-@JsonCachable
-class OptionDeserializer(elementType: JavaType,
-                              elementDeserializer: JsonDeserializer[Object])
-  extends JsonDeserializer[Object] {
+class OptionDeserializer(elementType: JavaType)
+  extends JsonDeserializer[Object] with ResolvableDeserializer {
+
+  var elementDeserializer: JsonDeserializer[Object] = _
+
+  override def getEmptyValue = None
+
+  override def getNullValue = None
 
   def deserialize(jp: JsonParser, ctxt: DeserializationContext) = {
     if (jp.getCurrentToken == JsonToken.VALUE_NULL) {
@@ -17,4 +21,10 @@ class OptionDeserializer(elementType: JavaType,
       Some(elementDeserializer.deserialize(jp, ctxt))
     }
   }
+
+  def resolve(ctxt: DeserializationContext) {
+    elementDeserializer = ctxt.findRootValueDeserializer(elementType)
+  }
+
+  override def isCachable = true
 }

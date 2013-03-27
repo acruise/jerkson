@@ -10,31 +10,14 @@ brings Scala's ease-of-use to Jackson's features.
 Requirements
 ------------
 
-* Scala 2.8.1 or 2.9.0-1
-* Jackson 1.8.3
+* Scala 2.10
+* Jackson 2.1.1
 
 
 Setting Up Your Project
 -----------------------
 
-Go ahead and add Jerkson as a dependency:
-
-```xml
-<repositories>
-  <repository>
-    <id>repo.codahale.com</id>
-    <url>http://repo.codahale.com</url>
-  </repository>
-</repositories>
-
-<dependencies>
-  <dependency>
-    <groupId>com.codahale</groupId>
-    <artifactId>jerkson_${scala.version}</artifactId>
-    <version>0.4.0</version>
-  </dependency>
-</dependencies>
-```
+Clone and make a source dependency
 
 
 Parsing JSON
@@ -75,6 +58,20 @@ generate(Map("one"->1, "two"->"dos")) //=> {"one":1,"two":"dos"}
 ```
 
 For more examples, check out the [specs](https://github.com/codahale/jerkson/blob/master/src/test/scala/com/codahale/jerkson/tests/).
+
+
+Handling `snake_case` Field Names
+=================================
+
+```scala
+case class Person(firstName: String, lastName: String)
+
+@JsonSnakeCase
+case class Snake(firstName: String, lastName: String)
+
+generate(Person("Coda", "Hale"))   //=> {"firstName": "Coda","lastName":"Hale"}
+generate(Snake("Windey", "Mover")) //=> {"first_name": "Windey","last_name":"Mover"}
+```
 
 
 License

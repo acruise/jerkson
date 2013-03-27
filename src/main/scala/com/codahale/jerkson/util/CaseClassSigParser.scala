@@ -1,10 +1,9 @@
 package com.codahale.jerkson.util
 
 import com.codahale.jerkson.util.scalax.rules.scalasig._
-import org.codehaus.jackson.`type`.JavaType
-import org.codehaus.jackson.map.`type`.TypeFactory
+import com.fasterxml.jackson.databind.JavaType
+import com.fasterxml.jackson.databind.`type`.TypeFactory
 import scala.reflect.ScalaSignature
-import scala.reflect.generic.ByteCodecs
 
 class MissingPickledSig(clazz: Class[_]) extends Error("Failed to parse pickled Scala signature from: %s".format(clazz))
 
@@ -38,22 +37,22 @@ object CaseClassSigParser {
     }
   }
 
-  private def parseScalaSig(_clazz: Class[_]): Option[ScalaSig] = {
-    val clazz = findRootClass(_clazz)
+  private def parseScalaSig(_clazz: Class[_], classLoader: ClassLoader): Option[ScalaSig] = {
+    val clazz = findRootClass(_clazz, classLoader)
     parseClassFileFromByteCode(clazz).map(ScalaSigParser.parse(_)).getOrElse(None) orElse
       parseByteCodeFromAnnotation(clazz).map(ScalaSigAttributeParsers.parse(_)) orElse
       None
   }
 
-  protected def findRootClass(klass: Class[_]) =
-    Class.forName(klass.getName.split("\\$").head)
+  protected def findRootClass(klass: Class[_], classLoader: ClassLoader) =
+    loadClass(klass.getName.split("\\$").head, classLoader)
 
   protected def simpleName(klass: Class[_]) =
     klass.getName.split("\\$").last
 
-  protected def findSym[A](clazz: Class[A]) = {
+  protected def findSym[A](clazz: Class[A], classLoader: ClassLoader) = {
     val name = simpleName(clazz)
-    val pss = parseScalaSig(clazz)
+    val pss = parseScalaSig(clazz, classLoader)
     pss match {
       case Some(x) => {
         val topLevelClasses = x.topLevelClasses
@@ -79,29 +78,42 @@ object CaseClassSigParser {
     }
   }
 
-  def parse[A](clazz: Class[A], factory: TypeFactory) = {
-    findSym(clazz).children
-      .filter(c => c.isCaseAccessor && !c.isPrivate)
-      .map(_.asInstanceOf[MethodSymbol])
-      .zipWithIndex
-      .flatMap {
-        case (ms, idx) => {
-          ms.infoType match {
-            case NullaryMethodType(t: TypeRefType) => Some(ms.name -> typeRef2JavaType(t, factory))
-            case _ => None
-          }
+  def parse[A](clazz: Class[A], factory: TypeFactory, classLoader: ClassLoader) = {
+    findSym(clazz, classLoader).children.filter(c => c.isCaseAccessor && !c.isPrivate)
+      .flatMap { ms =>
+        ms.asInstanceOf[MethodSymbol].infoType match {
+          case NullaryMethodType(t: TypeRefType) => ms.name -> typeRef2JavaType(t, factory, classLoader) :: Nil
+          case _ => Nil
         }
       }
   }
 
-  protected def typeRef2JavaType(ref: TypeRefType, factory: TypeFactory): JavaType = {
+  protected def typeRef2JavaType(ref: TypeRefType, factory: TypeFactory, classLoader: ClassLoader): JavaType = {
     try {
-      val klass = loadClass(ref.symbol.path)
-      factory.constructParametricType(
-        klass, ref.typeArgs.map {
-          t => typeRef2JavaType(t.asInstanceOf[TypeRefType], factory)
-        }: _*
-      )
+      if (ref.symbol.path == "scala.Array") {
+        val elementType = typeRef2JavaType(ref.typeArgs.head.asInstanceOf[TypeRefType], factory, classLoader)
+        val realElementType = elementType.getRawClass.getName match {
+          case "java.lang.Boolean" => classOf[Boolean]
+          case "java.lang.Byte" => classOf[Byte]
+          case "java.lang.Character" => classOf[Char]
+          case "java.lang.Double" => classOf[Double]
+          case "java.lang.Float" => classOf[Float]
+          case "java.lang.Integer" => classOf[Int]
+          case "java.lang.Long" => classOf[Long]
+          case "java.lang.Short" => classOf[Short]
+          case _ => elementType.getRawClass
+        }
+
+        val array = java.lang.reflect.Array.newInstance(realElementType, 0)
+        factory.constructType(array.getClass)
+      } else {
+        val klass = loadClass(ref.symbol.path, classLoader)
+        factory.constructParametricType(
+          klass, ref.typeArgs.map {
+            t => typeRef2JavaType(t.asInstanceOf[TypeRefType], factory, classLoader)
+          }: _*
+        )
+      }
     } catch {
       case e: Throwable => {
         e.printStackTrace()
@@ -110,7 +122,7 @@ object CaseClassSigParser {
     }
   }
 
-  protected def loadClass(path: String) = path match {
+  protected def loadClass(path: String, classLoader: ClassLoader) = path match {
     case "scala.Predef.Map" => classOf[Map[_, _]]
     case "scala.Predef.Set" => classOf[Set[_]]
     case "scala.Predef.String" => classOf[String]
@@ -137,6 +149,6 @@ object CaseClassSigParser {
     case "scala.Char" => classOf[java.lang.Character]
     case "scala.Any" => classOf[Any]
     case "scala.AnyRef" => classOf[AnyRef]
-    case name => Class.forName(name)
+    case name => classLoader.loadClass(name)
   }
 }

@@ -1,7 +1,8 @@
 package com.codahale.jerkson.tests
 
-import org.codehaus.jackson.annotate.JsonIgnore
-import org.codehaus.jackson.JsonNode
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.annotation.{JsonIgnoreProperties, JsonIgnore}
+import com.codahale.jerkson.JsonSnakeCase
 
 case class CaseClass(id: Long, name: String)
 
@@ -13,6 +14,13 @@ case class CaseClassWithIgnoredField(id: Long) {
   @JsonIgnore
   val uncomfortable = "Bad Touch"
 }
+
+@JsonIgnoreProperties(Array("uncomfortable", "unpleasant"))
+case class CaseClassWithIgnoredFields(id: Long) {
+  val uncomfortable = "Bad Touch"
+  val unpleasant = "The Creeps"
+}
+
 case class CaseClassWithTransientField(id: Long) {
   @transient
   val lol = "I'm sure it's just a phase."
@@ -55,25 +63,3 @@ object OuterObject {
     case class SuperNestedCaseClass(id: Long)
   }
 }
-
-case class Unfortunate(i: Int) {
-  @JsonIgnore
-  def this() = this(-1)
-}
-
-case class DownrightSad(j: Int) {
-  def this(k: Long) = this(k.toInt)
-}
-
-abstract class InheritedMutable {
-  var pokeMe: Int = 0
-}
-
-case class CaseClassWithInheritedMutable(s: String) extends InheritedMutable
-
-abstract class InheritedVal(val gene: String)
-case class CaseClassWithOverrideVal(override val gene: String, bob: Int) extends InheritedVal(gene)
-
-abstract class Grandpappy(val oldness: String)
-abstract class Dad(val s: String) extends Grandpappy("extreme")
-case class Kiddo(i: Int) extends Dad("aww")

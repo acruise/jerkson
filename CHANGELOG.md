@@ -1,8 +1,26 @@
-v0.4.1: TBD
+v0.5.0: Oct 07 2011
 ===================
 
+* Added `canSerialize` and `canDeserialize`.
+* Upgraded Jackson to 1.9.0.
+* Dropped support for Scala 2.8.1, added support for 2.8.2. Upgrade.
+* Dropped support for 2.9.0-1. Upgrade.
+
+v0.4.2: Sep 16 2011
+===================
+
+* Added support for case classes with multiple constructors.
+* Added support for `snake_cased` JSON field names via the `@JsonSnakeCase`
+  annotation.
+
+v0.4.1: Sep 13 2011
+===================
+
+* Added `@JsonIgnoreProperties` support.
 * No longer serializing `transient` members of case classes.
-* Upgraded to Jackson 1.8.4.
+* Upgraded to Jackson 1.8.x. (Jerkson will now track the highest available
+  version in the 1.8.x series.)
+
 
 v0.4.0: Jul 25 2011
 ===================
