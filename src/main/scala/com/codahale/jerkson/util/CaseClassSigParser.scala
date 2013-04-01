@@ -126,6 +126,7 @@ object CaseClassSigParser {
     case "scala.Predef.Map" => classOf[Map[_, _]]
     case "scala.Predef.Set" => classOf[Set[_]]
     case "scala.Predef.String" => classOf[String]
+    case "scala.package.Either" => classOf[Either[_,_]]
     case "scala.package.List" => classOf[List[_]]
     case "scala.package.Seq" => classOf[Seq[_]]
     case "scala.package.Sequence" => classOf[Seq[_]]
