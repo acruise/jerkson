@@ -9,13 +9,13 @@
     </prerequisites>
 
     <groupId>com.codahale</groupId>
-    <artifactId>jerkson_2.10.0</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <artifactId>jerkson_2.10</artifactId>
+    <version>0.6.0.metafor3</version>
     <name>Jerkson for Scala</name>
 
     <properties>
-        <scala.version>2.10.0</scala.version>
-        <jackson.version>2.1.1</jackson.version>
+        <scala.version>2.10.1</scala.version>
+        <jackson.version>2.1.4</jackson.version>
     </properties>
 
     <developers>
