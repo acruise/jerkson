@@ -2,6 +2,8 @@ package com.codahale.jerkson.ser
 
 import java.lang.reflect.{Field, Modifier}
 
+import language.existentials
+
 import com.fasterxml.jackson.databind.{SerializerProvider, JsonSerializer}
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonIgnoreProperties}
 import com.fasterxml.jackson.core.JsonGenerator

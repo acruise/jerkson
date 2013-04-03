@@ -93,3 +93,5 @@ case class CaseClassWithInheritedMutable(s: String) extends InheritedMutable
 
 abstract class InheritedVal(val gene: String)
 case class CaseClassWithOverrideVal(override val gene: String, bob: Int) extends InheritedVal(gene)
+
+case class Nonbox(i: Int) extends AnyVal

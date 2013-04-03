@@ -286,5 +286,14 @@ class CaseClassSupportSpec extends Spec {
     }
   }
 
+  class `A value class` {
+    @Test def `should generate OK` = {
+      generate(Nonbox(1234)) must(be("""{"i":1234}"""))
+    }
+
+    @Test def `should parse OK` = {
+      parse[Nonbox]("""{"i" : 2345}""") must(be(Nonbox(2345)))
+    }
+  }
 
 }
