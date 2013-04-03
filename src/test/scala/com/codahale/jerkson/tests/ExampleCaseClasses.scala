@@ -79,3 +79,17 @@ case class CaseClassWithTwoConstructors(id: Long,  name: String) {
 case class CaseClassWithSnakeCase(oneThing: String, twoThing: String)
 
 case class CaseClassWithArrays(one: String, two: Array[String], three: Array[Int])
+
+@JsonTypeInfo(use=JsonTypeInfo.Id.MINIMAL_CLASS)
+sealed trait Thing
+case class ThingOne(one: Int) extends Thing
+case class ThingTwo(two: String) extends Thing
+
+abstract class InheritedMutable {
+  var pokeMe: Int = 0
+}
+
+case class CaseClassWithInheritedMutable(s: String) extends InheritedMutable
+
+abstract class InheritedVal(val gene: String)
+case class CaseClassWithOverrideVal(override val gene: String, bob: Int) extends InheritedVal(gene)

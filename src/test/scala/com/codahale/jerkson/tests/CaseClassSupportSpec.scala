@@ -258,4 +258,33 @@ class CaseClassSupportSpec extends Spec {
     }
   }
 
+  class `Polymorphic collections with JsonTypeInfo` {
+    @Test def `round-trip` = {
+      val map = Map(1 -> ThingOne(1), 2 -> ThingTwo("two"))
+      val gen = generate(map)
+
+      val map2 = parse[Map[Int,Thing]](gen)
+
+      map2.must(be(map))
+    }
+  }
+
+  class `A case class with an override val` {
+    @Test def `should generate OK` = {
+      generate(CaseClassWithOverrideVal("AGTC",1)) must(be("""{"gene":"AGTC","bob":1}"""))
+    }
+
+    @Test def `should parse OK` = {
+      parse[CaseClassWithOverrideVal]("""{"gene":"GATTACA","bob":2}""") must(be(CaseClassWithOverrideVal("GATTACA",2)))
+    }
+
+    @Test def `should roundtrip` = {
+      val value1 = CaseClassWithOverrideVal("CAT",3)
+      val json = generate(value1)
+      val value2 = parse[CaseClassWithOverrideVal](json)
+      value1 must(be(value2))
+    }
+  }
+
+
 }

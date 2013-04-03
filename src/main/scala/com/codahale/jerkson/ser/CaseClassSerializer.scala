@@ -1,6 +1,6 @@
 package com.codahale.jerkson.ser
 
-import java.lang.reflect.Modifier
+import java.lang.reflect.{Field, Modifier}
 
 import com.fasterxml.jackson.databind.{SerializerProvider, JsonSerializer}
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonIgnoreProperties}
@@ -16,11 +16,24 @@ class CaseClassSerializer[A <: Product](klass: Class[_]) extends JsonSerializer[
     klass.getAnnotation(classOf[JsonIgnoreProperties]).value().toSet
   } else Set.empty[String]
   
-  private val nonIgnoredFields = klass.getDeclaredFields.filterNot { f =>
-    f.getAnnotation(classOf[JsonIgnore]) != null ||
-    ignoredFields(f.getName) ||
+  private def ignoreField(f: Field): Boolean = {
+    f.isAnnotationPresent(classOf[JsonIgnore]) ||
+      ignoredFields(f.getName) ||
       (f.getModifiers & Modifier.TRANSIENT) != 0 ||
       f.getName.contains("$")
+  }
+
+  private val nonIgnoredFields = {
+    // TODO this should be an unfold but I R not SMRT
+    var soup = klass.getSuperclass
+    var fields = List(klass.getDeclaredFields.filterNot(ignoreField _)) // No _* on purpose
+
+    while (soup != null) {
+      fields ::= soup.getDeclaredFields.filterNot(ignoreField _).reverse
+      soup = soup.getSuperclass
+    }
+
+    fields.flatten
   }
 
   private val methods = klass.getDeclaredMethods
