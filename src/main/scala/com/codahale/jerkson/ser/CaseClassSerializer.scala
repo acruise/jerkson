@@ -54,6 +54,7 @@ class CaseClassSerializer[A <: Product](klass: Class[_]) extends JsonSerializer[
 
   def doSerialize(value: A, json: JsonGenerator, provider: SerializerProvider) {
     for (field <- nonIgnoredFields) {
+      field.setAccessible(true) // DIRTY BIRD
       val methodOpt = methods.get(field.getName)
       val fieldValue: Object = methodOpt.map { _.invoke(value) }.getOrElse(field.get(value))
       if (fieldValue != None) {
